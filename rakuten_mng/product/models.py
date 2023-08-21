@@ -1,3 +1,5 @@
+import requests
+import uuid
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -60,6 +62,45 @@ class Product(models.Model):
         blank=True,
         on_delete=models.SET_NULL
     )
+
+    @classmethod
+    def save_product(cls, data, products, created_by):
+        product = Product(
+            status=Product.Status.DRAFT,
+            source_url=data['source_url'],
+            title=data['title'],
+            condition=Product.Condition.NEW,
+            # TODO
+            # condition=data['condition'],
+            buy_price=data['price'],
+            sell_price=data['price']*2,
+            quantity=1,
+            # TODO
+            # quantity=data['quantity'],
+            # point=data['point'],
+            description=data['description'],
+            created_by=created_by
+        )
+        product.save()
+
+        # Photo
+        photos = data['photos']
+        for (index, photo) in enumerate(photos):
+            image = requests.get(photo['url'])
+            random_name = uuid.uuid1()
+            with open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.png'), 'wb') as f:
+                f.write(image.content)
+            image = Image.open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.png'))
+            productphoto = ProductPhoto(
+                product=product,
+                path=f'productphoto/{random_name}.png',
+                width=image.width,
+                height=image.height
+            )
+            productphoto.save()
+            if index >= 8:
+                break # Amazon allows maximium 9 Images
+        products.append(product)
 
     @authenticated_users
     def has_read_permission(request):
