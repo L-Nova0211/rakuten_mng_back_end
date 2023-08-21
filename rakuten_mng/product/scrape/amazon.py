@@ -9,7 +9,7 @@ from rakuten_mng.utils.convertext import convert_text
 
 
 class ScrapingEngine:
-    def scrape_item(self, source_url, data, result, driver):
+    def scrape_item(self, source_url, data, result):
         resp = requests.get(
             url=source_url
         )
@@ -56,7 +56,7 @@ class ScrapingEngine:
                 data['price'] = int(price_dom.text.split('￥')[-1].replace(',', ''))
                 data['description'] = data['title']
                 data['photos'] = []
-                pool.submit(self.scrape_item, source_url=item_url, data=data, result=result, driver=driver)
+                pool.submit(self.scrape_item, source_url=item_url, data=data, result=result)
             except Exception:
                 # raise ValueError(item.contents[-1].find('div', attrs={'class': 'a-section a-spacing-none a-spacing-top-small s-title-instructions-style'}).h2.text)
                 pass
