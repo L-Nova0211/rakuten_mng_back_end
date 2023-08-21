@@ -20,3 +20,7 @@ django-cors-headers==4.2.0  # https://github.com/adamchainz/django-cors-headers
 # DRF-spectacular for api documentation
 drf-spectacular==0.26.4  # https://github.com/tfranzel/drf-spectacular
 dry-rest-permissions==0.1.10
+
+# Scraping
+beautifulsoup4==4.12.2
+selenium==4.11.2
