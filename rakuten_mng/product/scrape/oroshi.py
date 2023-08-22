@@ -36,7 +36,7 @@ class ScrapingEngine:
 
         result = []
         temp = dom.find('ul', attrs={'class': '__product'}).contents
-        items = [item for item in temp if isinstance(item, str) is False]
+        items = [item for item in temp if isinstance(item, str) is False and bool(list(filter(lambda x: x=='__is-soldout', item.get('class')))) is False]
         pool = concurrent.futures.ThreadPoolExecutor(max_workers=100)
 
         for item in items:
