@@ -50,8 +50,8 @@ class ScrapingEngine:
                 # pool.submit(self.scrape_item, source_url=item_url, data=data, result=result)
                 self.scrape_item(item_url, data, result)
             except Exception:
-                raise ValueError(convert_text(item.find('h2', attrs={'class': '__title'}).text))
-                # pass
+                # raise ValueError(convert_text(item.find('h2', attrs={'class': '__title'}).text))
+                pass
         
         pool.shutdown(wait=True)
         return result
