@@ -46,3 +46,16 @@ class ProductViewSet(ModelViewSet):
             data='入力したサイトへのサービスはまだサポートされていません。',
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    @action(detail=False, methods=['POST'])
+    def bulk_remove_product(self, request):
+        id_arr = request.data['idArray']
+        for id in id_arr:
+            product = Product.objects.get(pk=id)
+            product.productphoto_set.all().delete()
+            product.delete()
+
+        return Response(
+            data='操作が成功しました。',
+            status=status.HTTP_200_OK
+        )
