@@ -48,6 +48,33 @@ class ProductViewSet(ModelViewSet):
         )
 
     @action(detail=False, methods=['POST'])
+    def insert_products(self, request):
+        service_secret = request.user.service_secret
+        license_key = request.user.license_key
+        id_arr = request.data['idArray']
+        data = {
+            'success': [],
+            'incomplete': [],
+            'failed': []
+        }
+        for id in id_arr:
+            product = Product.objects.get(pk=id)
+            resp = product.insert_to_rms(
+                service_secret=service_secret,
+                license_key=license_key
+            )
+            if resp == 'success':
+                data['success'].append(product.title)
+            elif resp == 'incomplete':
+                data['incomplete'].append(product.title)
+            elif resp == 'falied':
+                data['failed'].append(product.title)
+        return Response(
+            data=data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['POST'])
     def bulk_remove_product(self, request):
         id_arr = request.data['idArray']
         for id in id_arr:
