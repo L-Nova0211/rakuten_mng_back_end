@@ -23,11 +23,21 @@ class CabinetAPI:
 
 
 class ItemAPI:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, service_secret, license_key) -> None:
+        self.main_url = 'https://api.rms.rakuten.co.jp/es/2.0/items'
+        self.auth_key = base64.b64encode(f'{service_secret}:{license_key}'.encode()).decode()
+        self.headers = {
+            'Authorization': f'ESA {self.auth_key}'
+        }
 
-    def insert_item(self):
-        pass
+    def insert_item(self, manage_number, data):
+        url = f'{self.main_url}/manage-numbers/{manage_number}'
+        resp = requests.put(
+            headers=self.headers,
+            url=url,
+            json=data
+        )
+        return resp
 
 
 class InventoryAPI:
