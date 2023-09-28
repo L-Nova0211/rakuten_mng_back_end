@@ -16,6 +16,18 @@ class User(AbstractUser):
     name = CharField(_("Name of User"), blank=True, max_length=255)
     first_name = None  # type: ignore
     last_name = None  # type: ignore
+    service_secret = CharField(
+        _("service Secret"),
+        blank=True,
+        null=True,
+        max_length=255
+    )
+    license_key = CharField(
+        _("license Key"),
+        blank=True,
+        null=True,
+        max_length=255
+    )
 
     def get_absolute_url(self) -> str:
         """Get URL for user's detail view.
