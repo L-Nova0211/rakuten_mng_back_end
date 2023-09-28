@@ -5,6 +5,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from dry_rest_permissions.generics import authenticated_users
 from PIL import Image
+from django.utils.crypto import get_random_string
+
+from utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
 
 
 class Product(models.Model):
@@ -101,6 +104,85 @@ class Product(models.Model):
             if index >= 8:
                 break # Amazon allows maximium 9 Images
         products.append(product)
+
+    def insert_to_rms(self, service_secret, license_key):
+        # Insert Images
+        cabinet_api = CabinetAPI(service_secret, license_key)
+        success_images = []
+        for photo in self.productphoto_set.all():
+            file_name = str(photo.path).split('/')[-1]
+            file_path = f'{get_random_string(15).lower()}.jpg'
+            with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
+                file_content = f.read()
+            img_data = {
+                'xml': (
+                    None,  # File data is None because this is not a file field
+                    f'''<?xml version='1.0' encoding='UTF-8'?>
+                    <request>
+                        <fileInsertRequest>
+                            <file>
+                                <fileName>画像</fileName>
+                                <folderId>0</folderId>
+                                <filePath>{file_path}</filePath>
+                                <overWrite>true</overWrite>
+                            </file>
+                        </fileInsertRequest>
+                    </request>''',
+                ),
+                'file': (
+                    file_name,  # File field name and filename
+                    file_content,  # Binary image file data
+                ),
+            }
+            resp = cabinet_api.insert_image(data=img_data)
+            if resp.status_code == 200:
+                success_images.append(file_path)
+
+        # Insert Item
+        item_api = ItemAPI(service_secret, license_key)
+        manage_number = get_random_string(15).lower()
+        item_data = {
+            'itemNumber': manage_number,
+            'title': self.title,
+            'productDescription': {
+                'pc': '<br>【クール便希望の方はこちらをご購入下さい】<br><a href="https://item.rakuten.co.jp/angaroo/coolticket-1/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/09467877/imgrc0119736625.jpg" alt="クール便に変更希望の方はクリック" width="300" height="200"><br>',
+                'sp': '<br>【クール便希望の方はこちらをご購入下さい】<br><a href="https://item.rakuten.co.jp/angaroo/coolticket-1"><img src="https://image.rakuten.co.jp/angaroo/cabinet/09467877/imgrc0119736625.jpg" alt="クール便に変更希望の方はクリック" width="250" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0" width="250" height="150"></a><br>'
+            },
+            'itemType':  'NORMAL',
+            'images': [{'type': 'CABINET', 'location': f'/{file_path}', 'alt': 'Image'} for file_path in success_images],
+            'genreId': '214204',
+            'features': {
+                'displayManufacturerContents': True
+            },
+            # 'payment': {
+            #     'taxRate': '0.08'
+            # },
+            'variants': {
+                manage_number: {
+                    'restockOnCancel': True,
+                    'standardPrice': self.sell_price,
+                    'articleNumber': {
+                        'exemptionReason': 3
+                    }
+                }
+            }
+        }
+        resp = item_api.insert_item(manage_number=manage_number, data=item_data)
+
+        # Register Inventory Stock
+        if resp.status_code < 300:
+            inventory_api = InventoryAPI(service_secret, license_key)
+            inventory_data = {
+                "mode": "ABSOLUTE",
+                "quantity": self.quantity
+            }
+            resp = inventory_api.register_inventory_stock(manage_number=manage_number, variant_id=manage_number, data=inventory_data)
+            if resp.status_code < 300:
+                return 'success'
+            else:
+                return 'incomplete'
+        else:
+            return 'falied'
 
     @authenticated_users
     def has_read_permission(request):
