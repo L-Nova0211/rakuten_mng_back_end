@@ -18,7 +18,9 @@ class ScrapingEngine:
         dom = bs(resp.content, "html.parser")
 
         item_detail = dom.find('section', attrs={'class': '__information'})
+        data['jan'] = item_detail.find('div', attrs={'class': '__spec'}).table.tr.td.text
         # data['description'] = convert_text(item_detail.find('div', attrs={'class': '__description'}).text)
+        data['quantity'] = 20 # TODO
         photos = item_detail.find('div', attrs={'class': '__photo'}).find('div', attrs={'class': '__main'}).find_all('a')
         for photo in photos:
             url = photo['href']
