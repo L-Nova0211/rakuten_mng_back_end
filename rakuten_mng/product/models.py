@@ -84,7 +84,6 @@ class Product(models.Model):
             # condition=data['condition'],
             buy_price=data['price'],
             sell_price=data['price']*2,
-            quantity=1,
             quantity=data['quantity'],
             # TODO
             # point=data['point'],
