@@ -27,6 +27,12 @@ class Product(models.Model):
         default=Status.DRAFT
     )
     source_url = models.TextField(_('url'), null=True, blank=True)
+    jan = models.CharField(
+        _('JAN'),
+        max_length=50,
+        null=True,
+        blank=True
+    )
     title = models.CharField(
         _('title'),
         max_length=255,
