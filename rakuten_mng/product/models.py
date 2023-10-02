@@ -77,6 +77,7 @@ class Product(models.Model):
         product = Product(
             status=Product.Status.DRAFT,
             source_url=data['source_url'],
+            jan=data['jan'],
             title=data['title'],
             condition=Product.Condition.NEW,
             # TODO
@@ -84,8 +85,8 @@ class Product(models.Model):
             buy_price=data['price'],
             sell_price=data['price']*2,
             quantity=1,
+            quantity=data['quantity'],
             # TODO
-            # quantity=data['quantity'],
             # point=data['point'],
             description=data['description'],
             created_by=created_by
