@@ -151,8 +151,8 @@ class Product(models.Model):
             'itemNumber': manage_number,
             'title': self.title,
             'productDescription': {
-                'pc': '<br>【クール便希望の方はこちらをご購入下さい】<br><a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" alt="クール便に変更希望の方はクリック" width="300" height="200"><br>',
-                'sp': '<br>【クール便希望の方はこちらをご購入下さい】<br><a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" alt="クール便に変更希望の方はクリック" width="250" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0" width="250" height="150"></a><br>'
+                'pc': '<a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" border="0"width="300" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0"width="300" height="150"></a><br>',
+                'sp': '<a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" border="0"width="300" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0"width="300" height="150"></a><br>',
             },
             'itemType':  'NORMAL',
             'images': [{'type': 'CABINET', 'location': f'/{file_path}', 'alt': 'Image'} for file_path in success_images],
