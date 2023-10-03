@@ -169,6 +169,9 @@ class Product(models.Model):
                     'standardPrice': self.sell_price,
                     'articleNumber': {
                         'exemptionReason': 5
+                    },
+                    'shipping': {
+                        'postageIncluded': True
                     }
                 }
             }
