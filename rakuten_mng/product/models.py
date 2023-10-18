@@ -293,3 +293,9 @@ class ProductSetting(models.Model):
         choices=RakutenFee.choices,
         default=RakutenFee.Ten
     )
+    created_by = models.ForeignKey(
+        "users.user",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
+    )
