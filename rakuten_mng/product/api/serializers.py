@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from rakuten_mng.product.models import Product, ProductPhoto
+from rakuten_mng.product.models import Product, ProductPhoto, ProductSetting
 from rakuten_mng.users.api.serializers import UserSerializer
 
 
@@ -19,5 +19,14 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
+        fields = "__all__"
+        depth = 1
+
+
+class ProductSettingSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ProductSetting
         fields = "__all__"
         depth = 1
