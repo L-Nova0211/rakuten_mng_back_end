@@ -8,6 +8,7 @@ from PIL import Image
 from django.utils.crypto import get_random_string
 
 from utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
+from utils.calc_sell_price import calc_sell_price
 
 
 class Product(models.Model):
@@ -174,7 +175,19 @@ class Product(models.Model):
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
-        manage_number = get_random_string(15).lower()
+        if self.jan:
+            manage_number = f'{self.jan}-{self.count_set}'
+        else:
+            manage_number = get_random_string(15).lower()
+
+        shipping_fee = ProductSetting.objects.get(created_by=self.created_by).shipping_mail_fee or 0
+        sell_price = calc_sell_price(
+            buy_price=self.buy_price,
+            count_set=self.count_set,
+            shipping_fee=shipping_fee
+        )
+        rakuten_fee = int((ProductSetting.objects.get(created_by=self.created_by).rakuten_fee or 0)*sell_price)
+        
         item_data = {
             'itemNumber': manage_number,
             'title': self.title,
@@ -194,7 +207,7 @@ class Product(models.Model):
             'variants': {
                 manage_number: {
                     'restockOnCancel': True,
-                    'standardPrice': self.sell_price,
+                    'standardPrice': sell_price,
                     'articleNumber': {
                         'exemptionReason': 5
                     },
@@ -214,7 +227,18 @@ class Product(models.Model):
                 "quantity": self.quantity
             }
             resp = inventory_api.register_inventory_stock(manage_number=manage_number, variant_id=manage_number, data=inventory_data)
+            
+            self.manage_number = manage_number
+            self.sell_price = sell_price
+            self.shipping_fee = shipping_fee
+            self.rakuten_fee = rakuten_fee
+            self.point = 1
+            self.profit = 500
+            self.save()
+
             if resp.status_code < 300:
+                self.status = self.Status.ACTIVE
+                self.save()
                 return 'success'
             else:
                 return 'incomplete'
