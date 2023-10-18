@@ -21,6 +21,8 @@ class ScrapingEngine:
         # for description in descriptions:
         #     data['description'].append(convert_text(description.text))
         
+        data['jan'] = ''
+        data['quantity'] = 20
         pattern = r'"large":"https://m.media-amazon.com.*?.jpg'
         matches = re.findall(pattern, dom.find('div', attrs={'id': 'imageBlock_feature_div'}).find_all('script')[2].text)
         for item in matches:

@@ -5,14 +5,16 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from dry_rest_permissions.generics import DRYPermissions
 
-from .serializers import ProductSerializer
-from rakuten_mng.product.models import Product
+from .serializers import ProductSerializer, ProductSettingSerializer
+from rakuten_mng.product.models import Product, ProductSetting
 from rakuten_mng.product.scrape.engineselector import select_engine
+from utils.filterbackend import FilterBackend
 
 
 class ProductViewSet(ModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = Product.objects.all()
+    filter_backends = [FilterBackend]
     filterset_fields = ['status']
     serializer_class = ProductSerializer
 
@@ -49,8 +51,9 @@ class ProductViewSet(ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def insert_products(self, request):
-        service_secret = request.user.service_secret
-        license_key = request.user.license_key
+        productsetting = ProductSetting.objects.get(created_by=request.user)
+        service_secret = productsetting.service_secret
+        license_key = productsetting.license_key
         id_arr = request.data['idArray']
         data = {
             'success': [],
@@ -84,5 +87,59 @@ class ProductViewSet(ModelViewSet):
 
         return Response(
             data='操作が成功しました。',
+            status=status.HTTP_200_OK
+        )
+
+
+class ProductSettingViewSet(ModelViewSet):
+    permission_classes = (DRYPermissions, )
+    queryset = ProductSetting.objects.all()
+    serializer_class = ProductSettingSerializer
+
+    def get_queryset(self):
+        return ProductSetting.objects.filter(created_by=self.request.user)
+    
+    @action(detail=False, methods=['POST'])
+    def register(self, request):
+        productsetting = ProductSetting(
+            license_key=request.data['apiKey'],
+            service_secret=request.data['serviceSecret'],
+            shipping_mail_fee=request.data['shippingMail'],
+            shipping_60_fee=request.data['shipping60'],
+            shipping_80_fee=request.data['shipping80'],
+            shipping_100_fee=request.data['shipping100'],
+            shipping_120_fee=request.data['shipping120'],
+            scraping_update_amazon_from=request.data['updateAmazon'],
+            scraping_update_oroshi_from=request.data['updateOroshi'],
+            scraping_update_tajimaya_from=request.data['updateTajimaya'],
+            rakuten_fee=request.data['rakutenFee'],
+            created_by=request.user
+        )
+        productsetting.save()
+
+        return Response(
+            data=self.serializer_class(productsetting).data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['POST'])
+    def change(self, request):
+        productsetting = ProductSetting.objects.get(created_by = request.user)
+        productsetting.license_key=request.data['apiKey']
+        productsetting.service_secret=request.data['serviceSecret']
+        productsetting.shipping_mail_fee=request.data['shippingMail']
+        productsetting.shipping_60_fee=request.data['shipping60']
+        productsetting.shipping_80_fee=request.data['shipping80']
+        productsetting.shipping_100_fee=request.data['shipping100']
+        productsetting.shipping_120_fee=request.data['shipping120']
+        productsetting.scraping_update_amazon_from=request.data['updateAmazon']
+        productsetting.scraping_update_oroshi_from=request.data['updateOroshi']
+        productsetting.scraping_update_tajimaya_from=request.data['updateTajimaya']
+        productsetting.rakuten_fee=request.data['rakutenFee']
+        productsetting.created_by=request.user
+        productsetting.save()
+
+        return Response(
+            data=self.serializer_class(productsetting).data,
             status=status.HTTP_200_OK
         )
