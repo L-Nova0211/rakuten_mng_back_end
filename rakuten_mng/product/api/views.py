@@ -8,11 +8,13 @@ from dry_rest_permissions.generics import DRYPermissions
 from .serializers import ProductSerializer
 from rakuten_mng.product.models import Product
 from rakuten_mng.product.scrape.engineselector import select_engine
+from utils.filterbackend import FilterBackend
 
 
 class ProductViewSet(ModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = Product.objects.all()
+    filter_backends = [FilterBackend]
     filterset_fields = ['status']
     serializer_class = ProductSerializer
 
