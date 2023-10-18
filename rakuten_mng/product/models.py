@@ -228,3 +228,68 @@ class ProductPhoto(models.Model):
         null=True,
         blank=True
     )
+
+
+class ProductSetting(models.Model):
+    class RakutenFee(models.Choices):
+        Zero = 0
+        Eight = 8
+        Ten = 10
+
+    license_key = models.CharField(
+        _("license Key"),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    service_secret = models.CharField(
+        _("service Secret"),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    shipping_mail_fee = models.IntegerField(
+        _("email Shipping Fee"),
+        null=True,
+        blank=True
+    )
+    shipping_60_fee = models.IntegerField(
+        _("60 Shipping Fee"),
+        null=True,
+        blank=True
+    )
+    shipping_80_fee = models.IntegerField(
+        _("80 Shipping Fee"),
+        null=True,
+        blank=True
+    )
+    shipping_100_fee = models.IntegerField(
+        _("100 Shipping Fee"),
+        null=True,
+        blank=True
+    )
+    shipping_120_fee = models.IntegerField(
+        _("120 Shipping Fee"),
+        null=True,
+        blank=True
+    )
+    scraping_update_amazon_from = models.IntegerField(
+        _("upadating Amazon Time"),
+        null=True,
+        blank=True
+    )
+    scraping_update_tajimaya_from = models.IntegerField(
+        _("updating Tajimaya Time"),
+        null=True,
+        blank=True
+    )
+    scraping_update_oroshi_from = models.IntegerField(
+        _("updating Oroshi Time"),
+        null=True,
+        blank=True
+    )
+    rakuten_fee = models.IntegerField(
+        _("rakuten Fee"),
+        choices=RakutenFee.choices,
+        default=RakutenFee.Ten
+    )
