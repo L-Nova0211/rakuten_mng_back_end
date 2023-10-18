@@ -299,3 +299,11 @@ class ProductSetting(models.Model):
         blank=True,
         on_delete=models.SET_NULL
     )
+
+    @authenticated_users
+    def has_read_permission(self):
+        return True
+    
+    @authenticated_users
+    def has_write_permission(self):
+        return True
