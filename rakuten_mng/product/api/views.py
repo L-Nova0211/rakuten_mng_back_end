@@ -51,8 +51,9 @@ class ProductViewSet(ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def insert_products(self, request):
-        service_secret = request.user.service_secret
-        license_key = request.user.license_key
+        productsetting = ProductSetting.objects.get(created_by=request.user)
+        service_secret = productsetting.service_secret
+        license_key = productsetting.license_key
         id_arr = request.data['idArray']
         data = {
             'success': [],
