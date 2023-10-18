@@ -113,10 +113,8 @@ class Product(models.Model):
             # TODO
             # condition=data['condition'],
             buy_price=data['price'],
-            sell_price=data['price']*2,
             quantity=data['quantity'],
-            # TODO
-            # point=data['point'],
+            count_set=data['count_set'],
             description=data['description'],
             created_by=created_by
         )
