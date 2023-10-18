@@ -55,6 +55,11 @@ class Product(models.Model):
         null=True,
         blank=True
     )
+    count_set = models.IntegerField(
+        _('count Set'),
+        null=True,
+        blank=True,
+    )
     quantity = models.IntegerField(
         _('quantity'),
         null=True,
