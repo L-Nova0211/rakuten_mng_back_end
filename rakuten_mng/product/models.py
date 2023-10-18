@@ -13,7 +13,6 @@ from utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
 class Product(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'Draft' # Not Publish yet
-        INCOMPLETE = 'Incomplete' # Publish, but has some errors
         INACTIVE = 'Inactive' # Publish, but not Active
         ACTIVE = 'Active' # Publish, Active
 
