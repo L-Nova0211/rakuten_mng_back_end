@@ -32,6 +32,12 @@ class Product(models.Model):
         null=True,
         blank=True
     )
+    manage_number = models.CharField(
+        _("manage Number"),
+        max_length=255,
+        null=True,
+        blank=True
+    )
     title = models.CharField(
         _('title'),
         max_length=255,
@@ -51,6 +57,26 @@ class Product(models.Model):
     )
     sell_price = models.IntegerField(
         _('sell Price'),
+        null=True,
+        blank=True
+    )
+    shipping_fee = models.IntegerField(
+        _("shipping Fee"),
+        null=True,
+        blank=True
+    )
+    rakuten_fee = models.IntegerField(
+        _("rakuten Fee"),
+        null=True,
+        blank=True
+    )
+    point = models.IntegerField(
+        _("point"),
+        null=True,
+        blank=True,
+    )
+    profit = models.IntegerField(
+        _("profit"),
         null=True,
         blank=True
     )
