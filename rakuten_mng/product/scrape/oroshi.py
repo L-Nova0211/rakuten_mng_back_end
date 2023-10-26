@@ -1,5 +1,4 @@
 import concurrent.futures
-import re
 import requests
 from bs4 import BeautifulSoup as bs
 
@@ -16,8 +15,6 @@ class ScrapingEngine:
         item_detail = dom.find('section', attrs={'class': '__information'})
         data['jan'] = item_detail.find('div', attrs={'class': '__spec'}).table.tr.td.text
         # data['description'] = convert_text(item_detail.find('div', attrs={'class': '__description'}).text)
-        pattern = r'\d+'
-        data['price'] = int(re.findall(pattern, convert_text(item_detail.find('div', attrs={'class': '__spec'}).table.find_all('tr')[-1].text))[0])
         data['quantity'] = 20 # TODO
         photos = dom.find('div', attrs={'class': '__photo'}).find_all('a')
         for photo in photos:
@@ -51,7 +48,7 @@ class ScrapingEngine:
                 data = {}
                 data['title'] = convert_text(item.find('h2', attrs={'class': '__title'}).text)
                 data['source_url'] = item_url
-                data['price'] = int(float(item.find('span', attrs={'class': '__unit-price'}).text.split('円')[0]))
+                data['price'] = int(item.find('span', attrs={'class': '__unit-price'}).text.split('円')[0])
                 data['count_set'] = int(item.find('span', attrs={'class': '__quantity'}).text)
                 data['description'] = data['title']
                 data['photos'] = []
