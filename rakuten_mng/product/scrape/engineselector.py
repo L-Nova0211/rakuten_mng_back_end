@@ -5,9 +5,9 @@ from rakuten_mng.utils.scrape_site import scraping_site
 
 def select_engine(url):
     result = ''
-    for site in scraping_site.keys():
-        if site in url:
-            result = site
+    for key, value in scraping_site.items():
+        if key in url:
+            result = value
             break
 
     if result:

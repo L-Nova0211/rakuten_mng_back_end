@@ -1,5 +1,5 @@
 scraping_site = {
     'amazon': 'amazon',
-    'tajimaya': 'tajimaya',
-    'oroshi': 'oroshi'
+    'tajimaya-oroshi': 'tajimaya',
+    'oroshi-uri': 'oroshi'
 }
