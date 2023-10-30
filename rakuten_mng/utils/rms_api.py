@@ -10,6 +10,15 @@ class CabinetAPI:
             'Authorization': f'ESA {self.auth_key}'
         }
 
+    def insert_folder(self, data):
+        url = f'{self.main_url}/folder/insert'
+        resp = requests.post(
+            headers=self.headers,
+            url=url,
+            data=data
+        )
+        return resp
+    
     def insert_image(self, data):
         url = f'{self.main_url}/file/insert'
         self.headers['Content-Type'] = 'multipart/form-data'
