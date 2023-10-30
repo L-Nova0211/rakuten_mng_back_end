@@ -105,18 +105,30 @@ class Product(models.Model):
 
     @classmethod
     def save_product(cls, data, products, created_by):
+        shipping_fee = ProductSetting.objects.get(created_by=created_by).shipping_mail_fee or 0
+        sell_price = calc_sell_price(
+            buy_price=data['price'],
+            count_set=data['count_set'],
+            shipping_fee=shipping_fee,
+        )
+        rakuten_fee = int((ProductSetting.objects.get(created_by=created_by).rakuten_fee or 0)*sell_price/100)
         product = Product(
             status=Product.Status.DRAFT,
             source_url=data['source_url'],
             jan=data['jan'],
             title=data['title'],
+            description=data['description'],
             condition=Product.Condition.NEW,
             # TODO
             # condition=data['condition'],
+            sell_price=sell_price,
             buy_price=data['price'],
             quantity=data['quantity'],
             count_set=data['count_set'],
-            description=data['description'],
+            point=1, # Default Value in RMS
+            profit=500, # Defalut Value
+            shipping_fee=shipping_fee,
+            rakuten_fee=rakuten_fee,
             created_by=created_by
         )
         product.save()
