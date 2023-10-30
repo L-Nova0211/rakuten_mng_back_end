@@ -115,6 +115,10 @@ class Product(models.Model):
         on_delete=models.SET_NULL
     )
 
+    @authenticated_users
+    def has_write_permission(self, request):
+        return True
+
     @classmethod
     def save_product(cls, data, products, created_by):
         shipping_fee = ProductSetting.objects.get(created_by=created_by).shipping_mail_fee or 0
