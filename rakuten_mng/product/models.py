@@ -1,5 +1,6 @@
 import requests
 import uuid
+import xml.etree.ElementTree as ET
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -153,8 +154,27 @@ class Product(models.Model):
         products.append(product)
 
     def insert_to_rms(self, service_secret, license_key):
-        # Insert Images
         cabinet_api = CabinetAPI(service_secret, license_key)
+        # Insert Folder
+        if self.jan:
+            manage_number = f'{self.jan}-{self.count_set}'
+        else:
+            manage_number = get_random_string(15).lower()
+
+        folder_data = f'''<?xml version="1.0" encoding="UTF-8"?>
+        <request>
+            <folderInsertRequest>
+                <folder>
+                    <folderName>{manage_number}</folderName>
+                </folder>
+            </folderInsertRequest>
+        </request>'''
+        resp = cabinet_api.insert_folder(folder_data)
+        if resp.status_code == 200:
+            root = ET.fromstring(resp.text)
+            folder_id = root.find('.//FolderId').text
+
+        # Insert Images
         success_images = []
         for photo in self.productphoto_set.all():
             file_name = str(photo.path).split('/')[-1]
@@ -169,7 +189,7 @@ class Product(models.Model):
                         <fileInsertRequest>
                             <file>
                                 <fileName>画像</fileName>
-                                <folderId>0</folderId>
+                                <folderId>{folder_id}</folderId>
                                 <filePath>{file_path}</filePath>
                                 <overWrite>true</overWrite>
                             </file>
@@ -187,19 +207,6 @@ class Product(models.Model):
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
-        if self.jan:
-            manage_number = f'{self.jan}-{self.count_set}'
-        else:
-            manage_number = get_random_string(15).lower()
-
-        shipping_fee = ProductSetting.objects.get(created_by=self.created_by).shipping_mail_fee or 0
-        sell_price = calc_sell_price(
-            buy_price=self.buy_price,
-            count_set=self.count_set,
-            shipping_fee=shipping_fee
-        )
-        rakuten_fee = int((ProductSetting.objects.get(created_by=self.created_by).rakuten_fee or 0)*sell_price)
-        
         item_data = {
             'itemNumber': manage_number,
             'title': self.title,
@@ -208,7 +215,7 @@ class Product(models.Model):
                 'sp': '<a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" border="0"width="300" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0"width="300" height="150"></a><br>',
             },
             'itemType':  'NORMAL',
-            'images': [{'type': 'CABINET', 'location': f'/{file_path}', 'alt': 'Image'} for file_path in success_images],
+            'images': [{'type': 'CABINET', 'location': f'/{folder_id}/{file_path}', 'alt': 'Image'} for file_path in success_images],
             'genreId': '214204',
             'features': {
                 'displayManufacturerContents': True
@@ -219,7 +226,7 @@ class Product(models.Model):
             'variants': {
                 manage_number: {
                     'restockOnCancel': True,
-                    'standardPrice': sell_price,
+                    'standardPrice': self.sell_price,
                     'articleNumber': {
                         'exemptionReason': 5
                     },
@@ -241,11 +248,6 @@ class Product(models.Model):
             resp = inventory_api.register_inventory_stock(manage_number=manage_number, variant_id=manage_number, data=inventory_data)
             
             self.manage_number = manage_number
-            self.sell_price = sell_price
-            self.shipping_fee = shipping_fee
-            self.rakuten_fee = rakuten_fee
-            self.point = 1
-            self.profit = 500
             self.save()
 
             if resp.status_code < 300:
