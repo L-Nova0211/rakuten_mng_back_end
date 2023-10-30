@@ -8,7 +8,7 @@ from PIL import Image
 from django.utils.crypto import get_random_string
 
 from utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
-from utils.calc_sell_price import calc_sell_price
+from utils.profit_util import calc_sell_price
 
 
 class Product(models.Model):
