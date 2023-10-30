@@ -20,6 +20,13 @@ class Product(models.Model):
     class Condition(models.TextChoices):
         NEW = 'new_new'
 
+    class ShippingMethod(models.TextChoices):
+        SHIPPINGMAIL = 'shipping_mail'
+        SHIPPING60 = 'shipping_60'
+        SHIPPING80 = 'shipping_80'
+        SHIPPING100 = 'shipping_100'
+        SHIPPING120 = 'shipping_120'
+
     status = models.CharField(
         _('status'),
         max_length=20,
@@ -60,6 +67,11 @@ class Product(models.Model):
         _('sell Price'),
         null=True,
         blank=True
+    )
+    shipping_method = models.CharField(
+        _("shipping Method"),
+        choices=ShippingMethod.choices,
+        default=ShippingMethod.SHIPPINGMAIL
     )
     shipping_fee = models.IntegerField(
         _("shipping Fee"),
