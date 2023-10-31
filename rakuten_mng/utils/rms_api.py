@@ -18,6 +18,14 @@ class CabinetAPI:
         )
         return resp
     
+    def get_files_in_folder(self, folder_id):
+        url = f'{self.main_url}/folder/files/get?folderId={folder_id}'
+        resp = requests.get(
+            headers=self.headers,
+            url=url
+        )
+        return resp
+    
     def insert_folder(self, data):
         url = f'{self.main_url}/folder/insert'
         resp = requests.post(
