@@ -46,6 +46,15 @@ class CabinetAPI:
         )
         return resp
 
+    def remove_image(self, data):
+        url = f'{self.main_url}/file/delete'
+        resp = requests.post(
+            headers=self.headers,
+            url=url,
+            data=data
+        )
+        return resp
+
 
 class ItemAPI:
     def __init__(self, service_secret, license_key) -> None:
