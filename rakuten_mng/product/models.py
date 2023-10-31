@@ -195,7 +195,6 @@ class Product(models.Model):
         success_images = []
         for photo in self.productphoto_set.all():
             file_name = str(photo.path).split('/')[-1]
-            file_path = f'{get_random_string(15).lower()}.jpg'
             with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
                 file_content = f.read()
             img_data = {
@@ -207,7 +206,7 @@ class Product(models.Model):
                             <file>
                                 <fileName>画像</fileName>
                                 <folderId>{folder_id}</folderId>
-                                <filePath>{file_path}</filePath>
+                                <filePath>{file_name}</filePath>
                                 <overWrite>true</overWrite>
                             </file>
                         </fileInsertRequest>
@@ -220,7 +219,7 @@ class Product(models.Model):
             }
             resp = cabinet_api.insert_image(data=img_data)
             if resp.status_code == 200:
-                success_images.append(file_path)
+                success_images.append(file_name)
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
@@ -236,7 +235,7 @@ class Product(models.Model):
                 'sp': '<a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" border="0"width="300" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0"width="300" height="150"></a><br>',
             },
             'itemType':  'NORMAL',
-            'images': [{'type': 'CABINET', 'location': f'/{folder_id}/{file_path}', 'alt': 'Image'} for file_path in success_images],
+            'images': [{'type': 'CABINET', 'location': f'/{folder_id}/{file_name}', 'alt': 'Image'} for file_path in success_images],
             'genreId': '214204',
             'features': {
                 'displayManufacturerContents': True
