@@ -48,6 +48,15 @@ class ItemAPI:
         )
         return resp
 
+    def patch_item(self, manage_number, data):
+        url = f'{self.main_url}/manage-numbers/{manage_number}'
+        resp = requests.patch(
+            headers=self.headers,
+            url=url,
+            json=data
+        )
+        return resp
+
 
 class InventoryAPI:
     def __init__(self, service_secret, license_key) -> None:
