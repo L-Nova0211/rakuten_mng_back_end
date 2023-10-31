@@ -155,13 +155,13 @@ class Product(models.Model):
         photos = data['photos']
         for (index, photo) in enumerate(photos):
             image = requests.get(photo['url'])
-            random_name = uuid.uuid1()
-            with open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.png'), 'wb') as f:
+            random_name = get_random_string(15).lower()
+            with open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.jpg'), 'wb') as f:
                 f.write(image.content)
-            image = Image.open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.png'))
+            image = Image.open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.jpg'))
             productphoto = ProductPhoto(
                 product=product,
-                path=f'productphoto/{random_name}.png',
+                path=f'productphoto/{random_name}.jpg',
                 width=image.width,
                 height=image.height
             )
