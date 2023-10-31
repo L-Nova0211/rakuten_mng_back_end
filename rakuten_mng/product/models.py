@@ -292,6 +292,45 @@ class Product(models.Model):
         else:
             return 'falied'
 
+    def patch_to_rms(self, service_secret, license_key, data):
+        # Upsert Item
+        item_api = ItemAPI(service_secret, license_key)
+        item_data = {
+            'title': data['title'],
+            'variants': {
+                self.manage_number: {
+                    'standardPrice': data['sell_price']
+                }
+            }
+        }
+        if int(data['point']) >= 2:
+            now = datetime.datetime.now() + datetime.timedelta(hours=3)
+            after_two_weeks = now + datetime.timedelta(14)
+            item_data['pointCampaign'] = {
+                'applicablePeriod': {
+                    'start': f'{now.year}-{now.month}-{now.day}T{now.hour}:00:00+09:00',
+                    'end': f'{after_two_weeks.year}-{after_two_weeks.month}-{after_two_weeks.day}T23:59:59+09:00'
+                },
+                'benefits': {
+                    'pointRate': data['point']
+                }
+            }
+        resp = item_api.patch_item(manage_number=self.manage_number, data=item_data)
+        
+        if resp.status_code < 300:
+            inventory_api = InventoryAPI(service_secret, license_key)
+            inventory_data = {
+                "mode": "ABSOLUTE",
+                "quantity": data['quantity']
+            }
+            resp = inventory_api.register_inventory_stock(manage_number=self.manage_number, variant_id=self.manage_number, data=inventory_data)
+            if resp.status_code < 300:
+                return 'success'
+            else:
+                return 'incomplete'
+        else:
+            return 'failed'
+
     @authenticated_users
     def has_read_permission(request):
         return True
