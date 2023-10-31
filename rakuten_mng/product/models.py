@@ -1,3 +1,4 @@
+import datetime
 import requests
 import uuid
 import xml.etree.ElementTree as ET
@@ -223,6 +224,10 @@ class Product(models.Model):
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
+        if ProductSetting.objects.get(created_by=self.created_by).rakuten_fee is None:
+            tax_rate = 0.1
+        else: 
+            tax_rate = ProductSetting.objects.get(created_by=self.created_by).rakuten_fee/100
         item_data = {
             'itemNumber': manage_number,
             'title': self.title,
@@ -236,9 +241,9 @@ class Product(models.Model):
             'features': {
                 'displayManufacturerContents': True
             },
-            # 'payment': {
-            #     'taxRate': '0.08'
-            # },
+            'payment': {
+                'taxRate': tax_rate
+            },
             'variants': {
                 manage_number: {
                     'restockOnCancel': True,
@@ -252,6 +257,18 @@ class Product(models.Model):
                 }
             }
         }
+        if self.point >= 2:
+            now = datetime.datetime.now() + datetime.timedelta(hours=3)
+            after_two_weeks = now + datetime.timedelta(14)
+            item_data['pointCampaign'] = {
+                'applicablePeriod': {
+                    'start': f'{now.year}-{now.month}-{now.day}T{now.hour}:00:00+09:00',
+                    'end': f'{after_two_weeks.year}-{after_two_weeks.month}-{after_two_weeks.day}T23:59:59+09:00'
+                },
+                'benefits': {
+                    'pointRate': self.point
+                }
+            }
         resp = item_api.insert_item(manage_number=manage_number, data=item_data)
 
         # Register Inventory Stock
