@@ -1,3 +1,6 @@
+import re
+
+
 NONBREAKSPACE = u'\xa0'
 NONBREAKTAB1 = u'\u300013'
 NONBREAKTAB2 = u'\u3000IO'
@@ -35,3 +38,11 @@ def convert_text(text):
 
     text = text.strip()
     return text
+
+def convert_product_name(product_name):
+    product_name = re.sub(r'【[^】]*】', '', product_name)
+    product_name = re.sub(r'[△□○]', '', product_name)
+    full_to_half = str.maketrans("１２３４５６７８９０（）ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ．",
+                                 "1234567890()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.")
+    product_name = product_name.translate(full_to_half)
+    return product_name.strip()

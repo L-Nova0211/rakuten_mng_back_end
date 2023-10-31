@@ -9,7 +9,7 @@ from PIL import Image
 from django.utils.crypto import get_random_string
 
 from utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
-from utils.calc_sell_price import calc_sell_price
+from utils.profit_util import calc_sell_price
 
 
 class Product(models.Model):
@@ -20,6 +20,13 @@ class Product(models.Model):
 
     class Condition(models.TextChoices):
         NEW = 'new_new'
+
+    class ShippingMethod(models.TextChoices):
+        SHIPPINGMAIL = 'shipping_mail'
+        SHIPPING60 = 'shipping_60'
+        SHIPPING80 = 'shipping_80'
+        SHIPPING100 = 'shipping_100'
+        SHIPPING120 = 'shipping_120'
 
     status = models.CharField(
         _('status'),
@@ -62,6 +69,11 @@ class Product(models.Model):
         null=True,
         blank=True
     )
+    shipping_method = models.CharField(
+        _("shipping Method"),
+        choices=ShippingMethod.choices,
+        default=ShippingMethod.SHIPPINGMAIL
+    )
     shipping_fee = models.IntegerField(
         _("shipping Fee"),
         null=True,
@@ -103,6 +115,10 @@ class Product(models.Model):
         blank=True,
         on_delete=models.SET_NULL
     )
+
+    @authenticated_users
+    def has_write_permission(self, request):
+        return True
 
     @classmethod
     def save_product(cls, data, products, created_by):

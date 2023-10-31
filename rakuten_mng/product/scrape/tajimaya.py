@@ -2,7 +2,7 @@ import concurrent.futures
 import requests
 from bs4 import BeautifulSoup as bs
 
-from rakuten_mng.utils.convertext import convert_text
+from rakuten_mng.utils.convertext import convert_text, convert_product_name
 
 
 class ScrapingEngine:
@@ -48,10 +48,12 @@ class ScrapingEngine:
                 item_url = item.a['href']
                 data = {}
                 data['title'] = convert_text(item.find('h2', attrs={'class': '__title'}).text)
+                data['title'] = convert_product_name(data['title'])
                 data['source_url'] = item_url
                 data['description'] = data['title']
                 data['price'] = int(float(item.find('span', attrs={'class': '__unit-price'}).text.split('円')[0]))
                 data['count_set'] = int(item.find('span', attrs={'class': '__quantity'}).text)
+                data['title'] = f'{data["title"]} {data["count_set"]}個セット'
                 data['photos'] = []
                 pool.submit(self.scrape_item, source_url=item_url, data=data, result=result)
             except Exception:

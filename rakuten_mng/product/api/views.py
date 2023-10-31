@@ -9,6 +9,7 @@ from .serializers import ProductSerializer, ProductSettingSerializer
 from rakuten_mng.product.models import Product, ProductSetting
 from rakuten_mng.product.scrape.engineselector import select_engine
 from utils.filterbackend import FilterBackend
+from utils.profit_util import calc_profit
 
 
 class ProductViewSet(ModelViewSet):
@@ -20,6 +21,32 @@ class ProductViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Product.objects.filter(created_by=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        product_setting = ProductSetting.objects.get(created_by=request.user)
+        shipping_fee = ProductSettingSerializer(product_setting).data[f'{request.data["shipping_method"]}_fee']
+        product = Product.objects.get(pk=kwargs['pk'])
+        profit = calc_profit(
+            float(request.data['sell_price']),
+            product.buy_price,
+            product.count_set,
+            shipping_fee,
+            int(request.data['point'])
+        )
+        
+        product.title = request.data['title']
+        product.sell_price = request.data['sell_price']
+        product.point = request.data['point']
+        product.quantity = request.data['quantity']
+        product.shipping_method = request.data['shipping_method']
+        product.shipping_fee = shipping_fee
+        product.profit = profit
+        product.save()
+
+        return Response(
+            data='Success',
+            status=status.HTTP_200_OK
+        )
 
     @action(detail=False, methods=['POST'])
     def scrape_data(self, request):
