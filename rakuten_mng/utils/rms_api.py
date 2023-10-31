@@ -82,6 +82,14 @@ class ItemAPI:
         )
         return resp
 
+    def remove_item(self, manage_number):
+        url = f'{self.main_url}/manage-numbers/{manage_number}'
+        resp = requests.delete(
+            headers=self.headers,
+            url=url
+        )
+        return resp
+
 
 class InventoryAPI:
     def __init__(self, service_secret, license_key) -> None:
