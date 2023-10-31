@@ -117,6 +117,43 @@ class ProductViewSet(ModelViewSet):
             status=status.HTTP_200_OK
         )
 
+    @action(detail=True, methods=['POST'])
+    def patch_product(self, request, pk):
+        product = Product.objects.get(pk=pk)
+        product_setting = ProductSetting.objects.get(created_by=request.user)
+        service_secret = product_setting.service_secret
+        license_key = product_setting.license_key
+
+        shipping_fee = ProductSettingSerializer(product_setting).data[f'{request.data["shipping_method"]}_fee']
+        profit = calc_profit(
+            float(request.data['sell_price']),
+            product.buy_price,
+            product.count_set,
+            shipping_fee,
+            int(request.data['point'])
+        )
+        resp = product.patch_to_rms(service_secret=service_secret, license_key=license_key, data=request.data)
+        if resp != 'failed':
+            product.title = request.data['title']
+            product.sell_price = request.data['sell_price']
+            product.point = request.data['point']
+            product.shipping_method = request.data['shipping_method']
+            product.shipping_fee = shipping_fee
+            product.profit = profit
+            if resp == 'success':
+                product.quantity = request.data['quantity']
+            product.save()
+
+            return Response(
+                data=resp,
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                data=resp,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 class ProductSettingViewSet(ModelViewSet):
     permission_classes = (DRYPermissions, )
