@@ -331,6 +331,19 @@ class Product(models.Model):
         else:
             return 'failed'
 
+    def deactive_to_rms(self, service_secret, license_key):
+        item_api = ItemAPI(service_secret, license_key)
+        item_data = {
+            'hideItem': True
+        }
+        resp = item_api.patch_item(manage_number=self.manage_number, data=item_data)
+        if resp.status_code < 300:
+            self.status = self.Status.INACTIVE
+            self.save()
+            return 'success'
+        else:
+            return 'failed'
+
     @authenticated_users
     def has_read_permission(request):
         return True
