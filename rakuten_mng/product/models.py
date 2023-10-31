@@ -343,6 +343,34 @@ class Product(models.Model):
         else:
             return 'failed'
 
+    def remove_to_rms(self, service_secret, license_key):
+        cabinet_api = CabinetAPI(service_secret, license_key)
+        for photo in self.productphoto_set.all():
+            # Search Image File
+            file_name = str(photo.path).split('/')[-1]
+            resp = cabinet_api.search_files(file_name)
+            if resp.status_code < 300:
+                # Remove Image File
+                root = ET.fromstring(resp.text)
+                file_id = root.find('.//FileId').text
+                image_data = f'''<?xml version="1.0" encoding="UTF-8"?>
+                <request>
+                    <fileDeleteRequest>
+                        <file>
+                            <fileId>{file_id}</fileId>
+                        </file>
+                    </fileDeleteRequest>
+                </request>'''
+                cabinet_api.remove_image(image_data)
+
+        item_api = ItemAPI(service_secret, license_key)
+        # Remove Item
+        resp = item_api.remove_item(self.manage_number)
+        if resp.status_code < 300:
+            return 'success'
+        else:
+            return 'failed'
+
     @authenticated_users
     def has_read_permission(request):
         return True
