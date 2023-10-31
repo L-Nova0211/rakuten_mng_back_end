@@ -155,13 +155,13 @@ class Product(models.Model):
         photos = data['photos']
         for (index, photo) in enumerate(photos):
             image = requests.get(photo['url'])
-            random_name = uuid.uuid1()
-            with open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.png'), 'wb') as f:
+            random_name = get_random_string(15).lower()
+            with open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.jpg'), 'wb') as f:
                 f.write(image.content)
-            image = Image.open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.png'))
+            image = Image.open(str(settings.APPS_DIR/ f'media/productphoto/{random_name}.jpg'))
             productphoto = ProductPhoto(
                 product=product,
-                path=f'productphoto/{random_name}.png',
+                path=f'productphoto/{random_name}.jpg',
                 width=image.width,
                 height=image.height
             )
@@ -195,7 +195,6 @@ class Product(models.Model):
         success_images = []
         for photo in self.productphoto_set.all():
             file_name = str(photo.path).split('/')[-1]
-            file_path = f'{get_random_string(15).lower()}.jpg'
             with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
                 file_content = f.read()
             img_data = {
@@ -207,7 +206,7 @@ class Product(models.Model):
                             <file>
                                 <fileName>画像</fileName>
                                 <folderId>{folder_id}</folderId>
-                                <filePath>{file_path}</filePath>
+                                <filePath>{file_name}</filePath>
                                 <overWrite>true</overWrite>
                             </file>
                         </fileInsertRequest>
@@ -220,7 +219,7 @@ class Product(models.Model):
             }
             resp = cabinet_api.insert_image(data=img_data)
             if resp.status_code == 200:
-                success_images.append(file_path)
+                success_images.append(file_name)
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
@@ -236,7 +235,7 @@ class Product(models.Model):
                 'sp': '<a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" border="0"width="300" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0"width="300" height="150"></a><br>',
             },
             'itemType':  'NORMAL',
-            'images': [{'type': 'CABINET', 'location': f'/{folder_id}/{file_path}', 'alt': 'Image'} for file_path in success_images],
+            'images': [{'type': 'CABINET', 'location': f'/{folder_id}/{file_name}', 'alt': 'Image'} for file_path in success_images],
             'genreId': '214204',
             'features': {
                 'displayManufacturerContents': True
@@ -328,6 +327,47 @@ class Product(models.Model):
                 return 'success'
             else:
                 return 'incomplete'
+        else:
+            return 'failed'
+
+    def deactive_to_rms(self, service_secret, license_key):
+        item_api = ItemAPI(service_secret, license_key)
+        item_data = {
+            'hideItem': True
+        }
+        resp = item_api.patch_item(manage_number=self.manage_number, data=item_data)
+        if resp.status_code < 300:
+            self.status = self.Status.INACTIVE
+            self.save()
+            return 'success'
+        else:
+            return 'failed'
+
+    def remove_to_rms(self, service_secret, license_key):
+        cabinet_api = CabinetAPI(service_secret, license_key)
+        for photo in self.productphoto_set.all():
+            # Search Image File
+            file_name = str(photo.path).split('/')[-1]
+            resp = cabinet_api.search_files(file_name)
+            if resp.status_code < 300:
+                # Remove Image File
+                root = ET.fromstring(resp.text)
+                file_id = root.find('.//FileId').text
+                image_data = f'''<?xml version="1.0" encoding="UTF-8"?>
+                <request>
+                    <fileDeleteRequest>
+                        <file>
+                            <fileId>{file_id}</fileId>
+                        </file>
+                    </fileDeleteRequest>
+                </request>'''
+                cabinet_api.remove_image(image_data)
+
+        item_api = ItemAPI(service_secret, license_key)
+        # Remove Item
+        resp = item_api.remove_item(self.manage_number)
+        if resp.status_code < 300:
+            return 'success'
         else:
             return 'failed'
 

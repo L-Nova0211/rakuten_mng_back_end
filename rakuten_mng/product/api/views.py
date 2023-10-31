@@ -154,6 +154,54 @@ class ProductViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    @action(detail=False, methods=['POST'])
+    def bulk_deactive_product(self, request):
+        product_setting = ProductSetting.objects.get(created_by=request.user)
+        service_secret = product_setting.service_secret
+        license_key = product_setting.license_key
+        id_arr = request.data['idArray']
+        data = {
+            'success': [],
+            'failed': []
+        }
+        for id in id_arr:
+            product = Product.objects.get(pk=id)
+            resp = product.deactive_to_rms(service_secret, license_key)
+            if resp == 'success':
+                data['success'].append(product.title)
+            elif resp == 'falied':
+                data['failed'].append(product.title)
+
+        return Response(
+            data=data,
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['POST'])
+    def bulk_remove_product_from_rakuten(self, request):
+        product_setting = ProductSetting.objects.get(created_by=request.user)
+        service_secret = product_setting.service_secret
+        license_key = product_setting.license_key
+        id_arr = request.data['idArray']
+        data = {
+            'success': [],
+            'failed': []
+        }
+        for id in id_arr:
+            product = Product.objects.get(pk=id)
+            resp = product.remove_to_rms(service_secret, license_key)
+            if resp == 'success':
+                data['success'].append(product.title)
+                product.productphoto_set.all().delete()
+                product.delete()
+            else:
+                data['failed'].append(product.title)
+
+        return Response(
+            data=data,
+            status=status.HTTP_200_OK
+        )
+
 
 class ProductSettingViewSet(ModelViewSet):
     permission_classes = (DRYPermissions, )

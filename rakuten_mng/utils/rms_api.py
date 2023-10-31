@@ -10,6 +10,22 @@ class CabinetAPI:
             'Authorization': f'ESA {self.auth_key}'
         }
 
+    def search_files(self, file_path):
+        url = f'{self.main_url}/files/search?filePath={file_path}'
+        resp = requests.get(
+            headers=self.headers,
+            url=url
+        )
+        return resp
+    
+    def get_files_in_folder(self, folder_id):
+        url = f'{self.main_url}/folder/files/get?folderId={folder_id}'
+        resp = requests.get(
+            headers=self.headers,
+            url=url
+        )
+        return resp
+    
     def insert_folder(self, data):
         url = f'{self.main_url}/folder/insert'
         resp = requests.post(
@@ -27,6 +43,15 @@ class CabinetAPI:
             url=url,
             data=data,
             files=data
+        )
+        return resp
+
+    def remove_image(self, data):
+        url = f'{self.main_url}/file/delete'
+        resp = requests.post(
+            headers=self.headers,
+            url=url,
+            data=data
         )
         return resp
 
@@ -54,6 +79,14 @@ class ItemAPI:
             headers=self.headers,
             url=url,
             json=data
+        )
+        return resp
+
+    def remove_item(self, manage_number):
+        url = f'{self.main_url}/manage-numbers/{manage_number}'
+        resp = requests.delete(
+            headers=self.headers,
+            url=url
         )
         return resp
 
