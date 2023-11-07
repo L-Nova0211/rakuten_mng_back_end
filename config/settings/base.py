@@ -305,3 +305,5 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+EMAIL_API_KEY = env('EMAIL_API_KEY')
+BACKEND_EMAIL = env('BACKEND_EMAIL')
