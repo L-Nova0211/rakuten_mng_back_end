@@ -114,7 +114,8 @@ class OrderAPI:
         self.main_url = 'https://api.rms.rakuten.co.jp/es/2.0/order'
         self.auth_key = base64.b64encode(f'{service_secret}:{license_key}'.encode()).decode()
         self.headers = {
-            'Authorization': f'ESA {self.auth_key}'
+            'Authorization': f'ESA {self.auth_key}',
+            'Content-Type': 'application/json; charset=utf-8'
         }
 
     def search_orders(self, data):
