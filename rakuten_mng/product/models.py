@@ -1,6 +1,5 @@
 import datetime
 import requests
-import uuid
 import xml.etree.ElementTree as ET
 from django.conf import settings
 from django.db import models
@@ -9,8 +8,8 @@ from dry_rest_permissions.generics import authenticated_users
 from PIL import Image
 from django.utils.crypto import get_random_string
 
-from utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
-from utils.profit_util import calc_sell_price
+from rakuten_mng.utils.rms_api import CabinetAPI, ItemAPI, InventoryAPI
+from rakuten_mng.utils.profit_util import calc_sell_price
 
 
 class Product(models.Model):
@@ -176,7 +175,7 @@ class Product(models.Model):
         if self.jan:
             manage_number = f'{self.jan}-{self.count_set}'
         else:
-            manage_number = get_random_string(15).lower()
+            manage_number = f'{get_random_string(15).lower()}-{self.count_set}'
 
         folder_data = f'''<?xml version="1.0" encoding="UTF-8"?>
         <request>
