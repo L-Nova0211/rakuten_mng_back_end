@@ -9,8 +9,8 @@ from dry_rest_permissions.generics import DRYPermissions
 from .serializers import ProductSerializer, ProductSettingSerializer
 from rakuten_mng.product.models import Product, ProductSetting
 from rakuten_mng.product.scrape.engineselector import select_engine
-from utils.filterbackend import FilterBackend
-from utils.profit_util import calc_profit
+from rakuten_mng.utils.filterbackend import FilterBackend
+from rakuten_mng.utils.profit_util import calc_profit
 
 
 class ProductViewSet(ModelViewSet):
