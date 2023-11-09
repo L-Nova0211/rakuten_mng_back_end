@@ -405,7 +405,7 @@ class ProductPhoto(models.Model):
 
 
 class ProductSetting(models.Model):
-    class RakutenFee(models.Choices):
+    class RakutenFee(models.IntegerChoices):
         Zero = 0
         Eight = 8
         Ten = 10
