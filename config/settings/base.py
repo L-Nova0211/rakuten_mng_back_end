@@ -86,6 +86,7 @@ LOCAL_APPS = [
     "rakuten_mng.users.apps.UsersConfig",
     # Your stuff: custom apps go here
     "rakuten_mng.product.apps.ProductConfig",
+    "rakuten_mng.order.apps.OrderConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -304,3 +305,5 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+EMAIL_API_KEY = env('EMAIL_API_KEY')
+BACKEND_EMAIL = env('BACKEND_EMAIL')

@@ -1,6 +1,7 @@
 import concurrent.futures
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from dry_rest_permissions.generics import DRYPermissions
@@ -8,15 +9,16 @@ from dry_rest_permissions.generics import DRYPermissions
 from .serializers import ProductSerializer, ProductSettingSerializer
 from rakuten_mng.product.models import Product, ProductSetting
 from rakuten_mng.product.scrape.engineselector import select_engine
-from utils.filterbackend import FilterBackend
-from utils.profit_util import calc_profit
+from rakuten_mng.utils.filterbackend import FilterBackend
+from rakuten_mng.utils.profit_util import calc_profit
 
 
 class ProductViewSet(ModelViewSet):
     permission_classes = (DRYPermissions, )
     queryset = Product.objects.all()
-    filter_backends = [FilterBackend]
+    filter_backends = [FilterBackend, SearchFilter]
     filterset_fields = ['status']
+    search_fields = ['title']
     serializer_class = ProductSerializer
 
     def get_queryset(self):

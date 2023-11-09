@@ -107,3 +107,31 @@ class InventoryAPI:
             json=data
         )
         return resp
+
+
+class OrderAPI:
+    def __init__(self, service_secret, license_key) -> None:
+        self.main_url = 'https://api.rms.rakuten.co.jp/es/2.0/order'
+        self.auth_key = base64.b64encode(f'{service_secret}:{license_key}'.encode()).decode()
+        self.headers = {
+            'Authorization': f'ESA {self.auth_key}',
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+
+    def search_orders(self, data):
+        url = f'{self.main_url}/searchOrder'
+        resp = requests.post(
+            headers=self.headers,
+            url=url,
+            json=data
+        )
+        return resp
+    
+    def get_order(self, data):
+        url = f'{self.main_url}/getOrder'
+        resp = requests.post(
+            headers=self.headers,
+            url=url,
+            json=data
+        )
+        return resp
