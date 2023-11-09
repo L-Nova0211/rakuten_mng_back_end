@@ -88,7 +88,7 @@ class Command(BaseCommand):
         
 
     def handle(self, *args, **options):
-        schedule.every().day.at('08:00').do(self.send_daily_order())
+        schedule.every().day.at('08:00').do(self.send_daily_order)
         while True:
             schedule.run_pending()
             time.sleep(1)
