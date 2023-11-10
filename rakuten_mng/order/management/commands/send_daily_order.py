@@ -49,7 +49,8 @@ class Command(BaseCommand):
                 order_list = resp.json()['OrderModelList']
                 if order_list:
                     with open(file=str(settings.APPS_DIR / f'media/{now.year}-{now.month}-{now.day}.csv'), mode='w', encoding='utf-8-sig', newline='') as f:
-                        field_names = ['注文日', '注文ID', '商品番号', '商品名', '商品ID', '商セット数', '注文件数', '合計数']
+                        # field_names = ['注文日', '注文ID', '商品番号', '商品名', '商品ID', '商セット数', '注文件数', '合計数']
+                        field_names = ['注文日', '注文ID', '商品番号', '商品名', '商品ID', '注文件数',]
                         writer = csv.DictWriter(f, fieldnames=field_names)
                         writer.writeheader()
 
@@ -64,9 +65,9 @@ class Command(BaseCommand):
                                     '商品番号': item['itemNumber'],
                                     '商品名': item['itemName'], 
                                     '商品ID': item['itemId'], 
-                                    '商セット数': count_set, 
+                                    # '商セット数': count_set, 
                                     '注文件数': item['units'], 
-                                    '合計数': item['units']*int(count_set)
+                                    # '合計数': item['units']*int(count_set)
                                 })
 
         if order_list:
@@ -88,7 +89,10 @@ class Command(BaseCommand):
         
 
     def handle(self, *args, **options):
-        schedule.every().day.at('08:00').do(self.send_daily_order)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
+        try:
+            schedule.every().day.at('08:00').do(self.send_daily_order)
+            while True:
+                schedule.run_pending()
+                time.sleep(1)
+        except Exception:
+            pass
