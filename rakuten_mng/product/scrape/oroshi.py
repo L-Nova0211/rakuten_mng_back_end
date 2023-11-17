@@ -6,8 +6,14 @@ from rakuten_mng.utils.convertext import convert_text, convert_product_name
 
 
 class ScrapingEngine:
+    def __init__(self) -> None:
+        self.headers = {
+            'Cookie': 'v_style=eyJpdiI6IjVqNlozUHFma3A3MEZFQ1pWTFc0bFE9PSIsInZhbHVlIjoiTmdZdVJodHVISTVZK1BLYXA1MHpTZGdLNDhTVno4MzFYemIrdjVnc2FrR3BSZVo4T3FmV2VkQmw4ejQvUlhvMiIsIm1hYyI6IjlkYzIxNTg5NTcyM2U3ZmEwNmEwNzQ1Mzg5YTBkYmY2NTY1YTcxZTdkZThiZjU0NWIxYWRkMDI2YjU2NjFmMzMifQ%3D%3D; _ga=GA1.1.1938331334.1692600949; remember_customer_59ba36addc2b2f9401580f014c7f58ea4e30989d=eyJpdiI6Ik15SjFDd1gyYTkybjdxVUh6Z1UwdWc9PSIsInZhbHVlIjoiU3dhekRvK3REam1oZkZ6Nm9hM0tMRkFoSkJLMEQxenBFcFRmRnliV2cxUjJObEFaWGNMOWtsalNUWVlZZ3A4cEVaZTJMbWd1dG9VQjNrZG11MmVmbzl2Qzl5SEcwSjNwckY0Q3lUclc2anRjUWpVb1NaQVlXbU13WjRVbG1nSDJQeUJvc0hXUUZiVUk3ODQzS3EvQlpINHlKQnhYcytNUXFYWHZJaGtIK2V1SmRWdTlPQXlsZ1E1Z1hVWlFMSko3c1pLbExpeGZ5S09CaVZTWGNia3B3SmRIVEg0akpCSjJjeHhrMnVCTmxZMD0iLCJtYWMiOiIwODMzYjNkNTFlMjc4OTAyOTBjODA2YTdmNjZiY2UxYzAzYzRiM2FiNWY1NTU4NzkxNjA4MDJiY2Y4YmZlZDNiIn0%3D; _clck=cfyi3l%7C2%7Cfgs%7C0%7C1328; product_viewed=eyJpdiI6InhYK1JTbmhEN3YzR0d3bGFsNjJ1UFE9PSIsInZhbHVlIjoiWUFJODhuQXkwdE43Z3lsTmtHcVlkU2JpeUQ4SngrNVl1K2ZrekE4OXNxeEpydW93dWM0WUF2MDFqeGtnK2Qwek5JZTJWYlU1eGV6dWFjVFdpcmd4V1RhY3hiMXZQeVhLaHBkSVo4SVRQbnh5NE1hSENKNk9IQm5pMzNVblptZnhoUm44dndVeGo3T0Q0NWpZbUZCb3A0cE1UNklTdkM3T3VIS3lzamU3dENHS2VPVzJjNEkzWjN4YjkrNUQ5Q1BFQ1I1ampXemFSaUJYOXBOMmI2OWtKOXZhYlJGdm44N0kvUE9ERW9nMHk2bDRhOXcybkVoMUZheUgyOVN5TWkybkdFRmFYUWVKOVNxSzVsdkw3VVpYNEdXdDA0U3prQVVPUElTaDRmRHN3eGE4RDhBalNTR0dURGhlY2NncjUxM2lLbTYvQUFoeXdRaHhDZkszYUs5eG4zNjhteUdibk1JRmt3cDRvTUhJcmcydmZmMlpnWkphY2RNK2hnSG5iOENKMXZtSURVV0tUekduMnEzOUpqNGhsdXovNjJnWWw1UXFXTGovT1YvYW52NlpzaWxNclBad3h6eXFjYno1SitJNUNleHdWWUwxb2J5cjRZamNGZ2thejdkb010dFJEZ1BPZUtKMjF4VTFNWW1FYWdwK09YNmhQeFA0K2owTkt0RTRGQU1kT2pIaldLUVpFVG9RampOZEJJZXh4Z0I4NjVacUYyVjFmcTBJT0VPSWtYbGtVRHBRL0hHRENMR3U0a1h6SDJRSGdpK2VIU1N4d2dqSVVCalVkeFhIODNCSGM3ZkhFSHdSaEdoZVhSSEFKVXRWTkFpUG11ZnBJN0RoWGlhMFVxcTduZUZhSUR4RS85RE15S1g3VStBZ0FJdlYyKzcweFRFTk1PUW04WFJia2NmYVB5VDRXeXFUd0xnSFVSZ3EiLCJtYWMiOiJjMDIxY2ZhYWQ1MGEyZjYyYWMzMGM5MGZjNjFlMzRmMmYzYzRhNjY3ZDNkYzZjZTkyOGJjNjgxNmU4ZjVmMjEyIn0%3D; _ga_KMEM37NKX4=GS1.1.1700179368.61.0.1700179368.60.0.0; _clsk=myrq2q%7C1700179369135%7C2%7C1%7Ct.clarity.ms%2Fcollect; b_closed_news=eyJpdiI6ImJGSEhNZ1pSbTlRb3VYN25xWmpwdnc9PSIsInZhbHVlIjoiZ3k5amE2WUQ5QkZxdDhIWEtsY2lVRHEvQjJjc3FKckxaam9nMG9Zd3dBYlBlaGRlR1Rvc1FMZUVXSVU0QmZZNXhHc2FEQWswbkVISzFhZUpDYnB1Tlg2dlpES1NPUzkrV0RsbUJ1WjloNFk9IiwibWFjIjoiYTEzNmMxN2YxOTY1YjFiNzQxMGJmMGY0NDg0M2I1ZjFjOTliZGRmODNlMDc2ZDA5N2IyYzdjZWVhMzE4NDYyZiJ9; XSRF-TOKEN=eyJpdiI6IkFCY290VDJIT2x3TndKRmFpZllkZ1E9PSIsInZhbHVlIjoiNDhBb1BIRDJMYjYyQStuL0JmNGFtdGQzUHczazkrMFAwL0dSdThEZ1FvM2owU2Q0eVU4ZFhsZDlPSUtKUjE1emVGTVJxb2VZNWg5L2Nla21VaGgyUmFMUU8wWXh1V1NKTTVPUy9YaHhDVnNCRTB4Zm5NeHIvclE2VEhrS1hKRloiLCJtYWMiOiI4NTlhODgwNzI4NGZkZTljZmRjNTRlN2U4ODdiZTIwNmJiMmEwM2IxMzgxMTFlYzAyMjVhYWJhZWYwZGQzNzY4In0%3D; b_ses=eyJpdiI6IkhpUzgydTBGS3hxMlFOUmx4NHM5RFE9PSIsInZhbHVlIjoiQVlLNG14L3N5ZTdmZDdNbW0xdVJlb3VMNmxiSkF3amdkZWZGeUcxSW9RS3gydFZaaTZPdUc4L3V1RmFkUWJKSDUrVU9UUERocVo4Mjd5VUI2Ukl6M3IyV0J0Y1lZSlVCcUtLSTIxZm8yUVd2OU82YUhFTTNoNWJHV2tEWUhXOVciLCJtYWMiOiIwMWZmYjllZjM3ZTJjZGI4M2UzNzIyODQ4NmU0ZDYwZGY5M2VlZjVhNGJkZDI2YzM1NTYyN2JlZjFkODgyZGNkIn0%3D'
+        }
+
     def scrape_item(self, source_url, data, result):
         resp = requests.get(
+            headers=self.headers,
             url=source_url
         )
         dom = bs(resp.content, "html.parser")
@@ -15,6 +21,8 @@ class ScrapingEngine:
         item_detail = dom.find('section', attrs={'class': '__information'})
         data['jan'] = item_detail.find('div', attrs={'class': '__spec'}).table.tr.td.text
         # data['description'] = convert_text(item_detail.find('div', attrs={'class': '__description'}).text)
+        data['price'] = int(dom.find('span', attrs={'class': 'c-tax-price __tax-price __is-none'}).text.split('円')[0])
+        data['count_set'] = int(dom.find('span', attrs={'class': '__quantity'}).text)
         data['quantity'] = 20 # TODO
         photos = dom.find('div', attrs={'class': '__photo'}).find_all('a')
         for photo in photos:
@@ -28,11 +36,8 @@ class ScrapingEngine:
         result.append(data)
     
     def scrape_item_list(self, source_url):
-        headers = {
-            'Cookie': 'v_style=eyJpdiI6IjVqNlozUHFma3A3MEZFQ1pWTFc0bFE9PSIsInZhbHVlIjoiTmdZdVJodHVISTVZK1BLYXA1MHpTZGdLNDhTVno4MzFYemIrdjVnc2FrR3BSZVo4T3FmV2VkQmw4ejQvUlhvMiIsIm1hYyI6IjlkYzIxNTg5NTcyM2U3ZmEwNmEwNzQ1Mzg5YTBkYmY2NTY1YTcxZTdkZThiZjU0NWIxYWRkMDI2YjU2NjFmMzMifQ%3D%3D; product_viewed=eyJpdiI6IldyY2JWRFk4bE56dUlEVFh5Z2J1V3c9PSIsInZhbHVlIjoiU3gvbHA0bWhvbXdmNjBVRG5xK21ITm81MW43d3BGcHJ5N2lYS0VCWVBmb0NPWnVKTFNHcnFZUjI0MmpGOS9CTjNodVFldU1QMWFPRnZjQ2hpVGRVNjA2WHgyVVhuUnJrWGRkMUxjL1ZqdFU5SVBEdWROQXRrU1JmZER2aHR4Vk50ODRlTllYRVlleXpoam4xb21pRGRzck56UWc5ajVCMDdhNHpob05FZEN4RHhjVDd4YkdpemdTaFYzNWFzaTdNb2dCa2YxakVqME9qRnh2YmlocGM0VjZ3YVk5c3J2dWllTjd0MWdnbStlM2NYNEFQUDJlSkZac3RhcmVHY2VzaWhNN09XTndybm1Jd0YreFdGY0hoZVVOQ0Q4cllsYUcycFIvVS9VNHJXTVJTYUdXaDQ4bXRVLzI0RWlCSDVqaVpXMXhzT0ZIRnU1T3hTek05TWpmVDhYc0poREpXMzJoTXhOOVhML080TGZBMWdRa1ZVanVBQjU3cVlrNUdwNmZkUU5JZXhlcXBvVnBaUGNEZ0NwWnIxdlJEOENxMGFzV095eERJaWZ2VXBSVGJYd21wSnpsT09wMnhZRHU1WTJ4ZE82M3U4MENaM1hBYk8xdTFEVS9kRzgrcmw0M1BwMlVBZHVGWHpNTUlhd2FONVY1dm9CazFLVGp4UUU0Y1k2UEY3UFNuMXZ5VkMxVVgwbTlEMDh5Y2FyZWE0cUJLSFh6Ulo2WERJNU5VeWVLa0w3YkJmcGdmT2FCSWM4eWRaMHJiT0pranE5aHRzQldlZG80NVRHQ2hzcFJ6Z0M3RG5LMitqZlJGT0JzcHBYQUZ4eFhJQnJlVFJqd3BoNjlCSnY5WVFkMkpjV1B6YVVsc1VQd0xQd3BXUW4rc0YycENFcXVQVU9Ta1RKVTZvd2hQRXpDQ20vOTdzM0QrVFpYemRoMlQiLCJtYWMiOiJhMjBjZmI3M2ZmZWFlMzQ4NWMyMTcwYzBiNDk4NGIzMjc4MjU5Mzg3MGQ5OWZhYmMwZTEzNDljNjc5MGIwNTBjIn0%3D; _ga=GA1.1.1938331334.1692600949; b_closed_news=eyJpdiI6InBGVGxISGFqWTRCT0JEa3d5ay9KK0E9PSIsInZhbHVlIjoiM1k4NXJmb3BWQnY5T3NhSlE5dktlUFdJMitGZG9LRUxaY1lueXFwQytiVXgrSTJrYWhSSEJuSVU5SzlSaWQ1U3E1NDZqc3JRck9wN0tQMy8rOWRiZEhETTVmOS9CT012eGRkUGJJR0FlVkU9IiwibWFjIjoiNTU1ZGUzZjFhZDk5MGE2YmI2MWZkMTAxZTkwODFjZWYxOWY0M2NkZDUzN2ZkMWZmZTBlNjZhMmRhODU1YWJmNSJ9; _clck=cfyi3l|2|fgk|0|1328; XSRF-TOKEN=eyJpdiI6ImE3NkhhTTFaUTE4bTZDeUxvSGRHelE9PSIsInZhbHVlIjoidHh4d25zM3NuaGE4SThtUzFJZ1JwVFp5MEdQdGt2RHliczhLUUxBdEl5a1JLNzRFWUY0bHJUZVBXV054cDFHdFZmYUpKZ2dHNkJNaG50YXdsdHdEUTN5QWgybklyOFEyNXFaZWRiQlFsWVNMcytkT0luSmZhbkxhZjNucmFhd00iLCJtYWMiOiI2NjZlMDYzOTdjZTU1N2Y4N2JjMDU1MDBhZjVhMDQ3NTQ0MjYwNmNiMTVkZWJiYzJkNzdlZDE3MGU4N2IyZjcyIn0%3D; b_ses=eyJpdiI6Ii90aVZRZktSTFlqVC9vbDdKdDNzbnc9PSIsInZhbHVlIjoiVStWbzFMQ1NyYWtjUlRRZDBybllkUnNJV3BxblJ5RWljd2NWOE9xR1lpNXRVUTBDc3FnSDh4Z1crejJlbUgvYndtUFBhYUhrU1pwRUc5QXltdXZ0Z0dHcnpzck9SdDVnTlEyZW15ZGpBZE1MdkpNRGxuWE9USzB1WHgrNC9XdmIiLCJtYWMiOiI3MjM1ZGI5MWFjNTY0OTZlM2Q1NzhmMmE0OGI1YmFjNTkyNzc4Yzk5MDkzNTZlMGUzNjhhNTc3ZmY1NmY1ZTA3In0%3D; _ga_KMEM37NKX4=GS1.1.1699532793.57.1.1699533133.59.0.0; _clsk=1nj99rb|1699533135083|4|1|q.clarity.ms/collect'
-        }
         response = requests.get(
-            headers=headers,
+            headers=self.headers,
             url=source_url
         )
         from_product_index = response.text.find('<section class="__list __list--row">')
@@ -52,9 +57,6 @@ class ScrapingEngine:
                 data['title'] = convert_text(item.find('h2', attrs={'class': '__title'}).text)
                 data['title'] = convert_product_name(data['title'])
                 data['source_url'] = item_url
-                data['price'] = int(item.find('span', attrs={'class': '__unit-price'}).text.split('円')[0])
-                data['count_set'] = int(item.find('span', attrs={'class': '__quantity'}).text)
-                data['title'] = f'{data["title"]} {data["count_set"]}個セット'
                 data['description'] = data['title']
                 data['photos'] = []
                 pool.submit(self.scrape_item, source_url=item_url, data=data, result=result)
@@ -63,4 +65,6 @@ class ScrapingEngine:
                 pass
         
         pool.shutdown(wait=True)
+        for item in result:
+            item['title'] = f'{item["title"]} {item["count_set"]}個セット'            
         return result
