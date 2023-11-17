@@ -223,9 +223,9 @@ class ProductSettingViewSet(ModelViewSet):
             shipping_80_fee=request.data['shipping80'],
             shipping_100_fee=request.data['shipping100'],
             shipping_120_fee=request.data['shipping120'],
-            scraping_update_amazon_from=request.data['updateAmazon'],
-            scraping_update_oroshi_from=request.data['updateOroshi'],
-            scraping_update_tajimaya_from=request.data['updateTajimaya'],
+            # scraping_update_amazon_from=request.data['updateAmazon'],
+            # scraping_update_oroshi_from=request.data['updateOroshi'],
+            # scraping_update_tajimaya_from=request.data['updateTajimaya'],
             rakuten_fee=request.data['rakutenFee'],
             created_by=request.user
         )
@@ -246,9 +246,9 @@ class ProductSettingViewSet(ModelViewSet):
         productsetting.shipping_80_fee=request.data['shipping80']
         productsetting.shipping_100_fee=request.data['shipping100']
         productsetting.shipping_120_fee=request.data['shipping120']
-        productsetting.scraping_update_amazon_from=request.data['updateAmazon']
-        productsetting.scraping_update_oroshi_from=request.data['updateOroshi']
-        productsetting.scraping_update_tajimaya_from=request.data['updateTajimaya']
+        # productsetting.scraping_update_amazon_from=request.data['updateAmazon']
+        # productsetting.scraping_update_oroshi_from=request.data['updateOroshi']
+        # productsetting.scraping_update_tajimaya_from=request.data['updateTajimaya']
         productsetting.rakuten_fee=request.data['rakutenFee']
         productsetting.created_by=request.user
         productsetting.save()
