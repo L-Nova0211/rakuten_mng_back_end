@@ -24,7 +24,6 @@ class ScrapingEngine:
         data['price'] = int(dom.find('span', attrs={'class': 'c-tax-price __tax-price __is-none'}).text.split('円')[0])
         data['count_set'] = int(dom.find('span', attrs={'class': '__quantity'}).text)
         data['quantity'] = 20 # TODO
-        data['title'] = f'{data["title"]} {data["count_set"]}個セット'
         photos = dom.find('div', attrs={'class': '__photo'}).find_all('a')
         for photo in photos:
             url = photo['href']
@@ -66,4 +65,6 @@ class ScrapingEngine:
                 pass
         
         pool.shutdown(wait=True)
+        for item in result:
+            item['title'] = f'{item["title"]} {item["count_set"]}個セット'            
         return result
