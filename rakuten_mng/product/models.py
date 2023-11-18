@@ -122,7 +122,7 @@ class Product(models.Model):
 
     @classmethod
     def save_product(cls, data, products, created_by):
-        shipping_fee = ProductSetting.objects.get(created_by=created_by).shipping_mail_fee or 0
+        shipping_fee = ProductSetting.objects.get(created_by=created_by).shipping_60_fee or 0
         sell_price = calc_sell_price(
             buy_price=data['price'],
             count_set=data['count_set'],
