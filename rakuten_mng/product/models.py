@@ -351,16 +351,17 @@ class Product(models.Model):
             if resp.status_code < 300:
                 # Remove Image File
                 root = ET.fromstring(resp.text)
-                file_id = root.find('.//FileId').text
-                image_data = f'''<?xml version="1.0" encoding="UTF-8"?>
-                <request>
-                    <fileDeleteRequest>
-                        <file>
-                            <fileId>{file_id}</fileId>
-                        </file>
-                    </fileDeleteRequest>
-                </request>'''
-                cabinet_api.remove_image(image_data)
+                if root.find('.//FileId'):
+                    file_id = root.find('.//FileId').text
+                    image_data = f'''<?xml version="1.0" encoding="UTF-8"?>
+                    <request>
+                        <fileDeleteRequest>
+                            <file>
+                                <fileId>{file_id}</fileId>
+                            </file>
+                        </fileDeleteRequest>
+                    </request>'''
+                    cabinet_api.remove_image(image_data)
 
         item_api = ItemAPI(service_secret, license_key)
         # Remove Item
