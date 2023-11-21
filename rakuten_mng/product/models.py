@@ -186,39 +186,39 @@ class Product(models.Model):
             </folderInsertRequest>
         </request>'''
         resp = cabinet_api.insert_folder(folder_data)
+        success_images = []
         if resp.status_code == 200:
             root = ET.fromstring(resp.text)
             folder_id = root.find('.//FolderId').text
 
-        # Insert Images
-        success_images = []
-        for photo in self.productphoto_set.all():
-            file_name = str(photo.path).split('/')[-1]
-            with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
-                file_content = f.read()
-            img_data = {
-                'xml': (
-                    None,  # File data is None because this is not a file field
-                    f'''<?xml version='1.0' encoding='UTF-8'?>
-                    <request>
-                        <fileInsertRequest>
-                            <file>
-                                <fileName>画像</fileName>
-                                <folderId>{folder_id}</folderId>
-                                <filePath>{file_name}</filePath>
-                                <overWrite>true</overWrite>
-                            </file>
-                        </fileInsertRequest>
-                    </request>''',
-                ),
-                'file': (
-                    file_name,  # File field name and filename
-                    file_content,  # Binary image file data
-                ),
-            }
-            resp = cabinet_api.insert_image(data=img_data)
-            if resp.status_code == 200:
-                success_images.append(file_name)
+            # Insert Images
+            for photo in self.productphoto_set.all():
+                file_name = str(photo.path).split('/')[-1]
+                with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
+                    file_content = f.read()
+                img_data = {
+                    'xml': (
+                        None,  # File data is None because this is not a file field
+                        f'''<?xml version='1.0' encoding='UTF-8'?>
+                        <request>
+                            <fileInsertRequest>
+                                <file>
+                                    <fileName>画像</fileName>
+                                    <folderId>{folder_id}</folderId>
+                                    <filePath>{file_name}</filePath>
+                                    <overWrite>true</overWrite>
+                                </file>
+                            </fileInsertRequest>
+                        </request>''',
+                    ),
+                    'file': (
+                        file_name,  # File field name and filename
+                        file_content,  # Binary image file data
+                    ),
+                }
+                resp = cabinet_api.insert_image(data=img_data)
+                if resp.status_code == 200:
+                    success_images.append(file_name)
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
