@@ -29,3 +29,4 @@ selenium==4.11.2
 
 # Python Schedule
 schedule==1.2.1
+xmltodict==0.13.0
