@@ -10,6 +10,14 @@ class CabinetAPI:
             'Authorization': f'ESA {self.auth_key}'
         }
 
+    def get_folders(self, offset, limit):
+        url = f'{self.main_url}/folders/get?offset={offset}&limit={limit}'
+        resp = requests.get(
+            headers=self.headers,
+            url=url
+        )
+        return resp
+
     def search_files(self, file_path):
         url = f'{self.main_url}/files/search?filePath={file_path}'
         resp = requests.get(
