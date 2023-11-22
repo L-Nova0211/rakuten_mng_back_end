@@ -1,5 +1,6 @@
 import datetime
 import requests
+import xmltodict
 import xml.etree.ElementTree as ET
 from django.conf import settings
 from django.db import models
@@ -170,32 +171,77 @@ class Product(models.Model):
         products.append(product)
 
     def insert_to_rms(self, service_secret, license_key):
+        # Get All Folders
         cabinet_api = CabinetAPI(service_secret, license_key)
+        folders = []
+        for i in range(5):
+            resp = cabinet_api.get_folders(offset=i+1, limit=100)
+            folder_arr = xmltodict.parse(resp.text)['result']['cabinetFoldersGetResult']['folders']['folder']
+            folders += folder_arr
+        # Get FoldersCount starts with 'rms_' ex:) rms_1, rms_2, ...
+        folder_count = sum('rms_' in folder['FolderName'] for folder in folders)
+
         # Insert Folder
+        if folder_count == 0: # If there is no folder starts with 'rms_'
+            folder_data = f'''<?xml version="1.0" encoding="UTF-8"?>
+            <request>
+                <folderInsertRequest>
+                    <folder>
+                        <folderName>rms_{folder_count+1}</folderName>
+                    </folder>
+                </folderInsertRequest>
+            </request>'''
+            resp = cabinet_api.insert_folder(folder_data)
+            folder_id = xmltodict.parse(resp.text)['result']['cabinetFolderInsertResult']['FolderId']
+        else:
+            folder_id = [folder['FolderId'] for folder in folders if folder['FolderName'] == f'rms_{folder_count}'][0]
+        
         if self.jan:
             manage_number = f'{self.jan}-{self.count_set}'
         else:
             manage_number = f'{get_random_string(15).lower()}-{self.count_set}'
 
-        folder_data = f'''<?xml version="1.0" encoding="UTF-8"?>
-        <request>
-            <folderInsertRequest>
-                <folder>
-                    <folderName>{manage_number}</folderName>
-                </folder>
-            </folderInsertRequest>
-        </request>'''
-        resp = cabinet_api.insert_folder(folder_data)
         success_images = []
-        if resp.status_code == 200:
-            root = ET.fromstring(resp.text)
-            folder_id = root.find('.//FolderId').text
-
-            # Insert Images
-            for photo in self.productphoto_set.all():
-                file_name = str(photo.path).split('/')[-1]
-                with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
-                    file_content = f.read()
+        # Insert Images
+        for photo in self.productphoto_set.all():
+            file_name = str(photo.path).split('/')[-1]
+            with open(file=str(settings.APPS_DIR/ f'media/{str(photo.path)}'), mode='rb') as f:
+                file_content = f.read()
+            img_data = {
+                'xml': (
+                    None,  # File data is None because this is not a file field
+                    f'''<?xml version='1.0' encoding='UTF-8'?>
+                    <request>
+                        <fileInsertRequest>
+                            <file>
+                                <fileName>画像</fileName>
+                                <folderId>{folder_id}</folderId>
+                                <filePath>{file_name}</filePath>
+                                <overWrite>true</overWrite>
+                            </file>
+                        </fileInsertRequest>
+                    </request>''',
+                ),
+                'file': (
+                    file_name,  # File field name and filename
+                    file_content,  # Binary image file data
+                ),
+            }
+            resp = cabinet_api.insert_image(data=img_data)
+            if resp.status_code == 200:
+                success_images.append(f'/{folder_id}/{file_name}')
+            else:
+                folder_count += 1
+                folder_data = f'''<?xml version="1.0" encoding="UTF-8"?>
+                <request>
+                    <folderInsertRequest>
+                        <folder>
+                            <folderName>rms_{folder_count}</folderName>
+                        </folder>
+                    </folderInsertRequest>
+                </request>'''
+                resp = cabinet_api.insert_folder(folder_data)
+                folder_id = xmltodict.parse(resp.text)['result']['cabinetFolderInsertResult']['FolderId']
                 img_data = {
                     'xml': (
                         None,  # File data is None because this is not a file field
@@ -218,7 +264,7 @@ class Product(models.Model):
                 }
                 resp = cabinet_api.insert_image(data=img_data)
                 if resp.status_code == 200:
-                    success_images.append(file_name)
+                    success_images.append(f'/{folder_id}/{file_name}')
 
         # Insert Item
         item_api = ItemAPI(service_secret, license_key)
@@ -234,7 +280,7 @@ class Product(models.Model):
                 'sp': '<a href="https://link.rakuten.co.jp/1/120/822/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999148/imgrc0120857202.jpg" border="0"width="300" height="150"></a><br><a href="https://link.rakuten.co.jp/0/117/285/"><img src="https://image.rakuten.co.jp/angaroo/cabinet/shop_parts/08999135/imgrc0116834913.jpg" border="0"width="300" height="150"></a><br>',
             },
             'itemType':  'NORMAL',
-            'images': [{'type': 'CABINET', 'location': f'/{folder_id}/{file_name}', 'alt': 'Image'} for file_path in success_images],
+            'images': [{'type': 'CABINET', 'location': file_path, 'alt': 'Image'} for file_path in success_images],
             'genreId': '214204',
             'features': {
                 'displayManufacturerContents': True
