@@ -75,7 +75,7 @@ class Command(BaseCommand):
             email_api = ELASTICEMAILAPI(email_api_key)
             email_data = {
                 'from': settings.BACKEND_EMAIL,
-                'to': products[0].created_by,
+                'to': products[0].created_by.email,
                 'subject': 'Daily Report',
                 'bodyHtml': 'This is daily report.'
             }
