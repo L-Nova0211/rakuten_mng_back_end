@@ -22,7 +22,7 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
 
     def get_queryset(self):
-        return Product.objects.filter(created_by=self.request.user)
+        return Product.objects.filter(created_by=self.request.user).order_by('id')
 
     def update(self, request, *args, **kwargs):
         product_setting = ProductSetting.objects.get(created_by=request.user)
@@ -87,20 +87,29 @@ class ProductViewSet(ModelViewSet):
         data = {
             'success': [],
             'incomplete': [],
-            'failed': []
+            'failed': [],
+            'duplicate': []
         }
         for id in id_arr:
             product = Product.objects.get(pk=id)
-            resp = product.insert_to_rms(
-                service_secret=service_secret,
-                license_key=license_key
-            )
-            if resp == 'success':
-                data['success'].append(product.title)
-            elif resp == 'incomplete':
-                data['incomplete'].append(product.title)
-            elif resp == 'falied':
-                data['failed'].append(product.title)
+            is_duplicated = False
+            for item in Product.objects.filter(created_by=request.user).exclude(status='Draft'):
+                if product.jan == item.jan and product.count_set == item.count_set:
+                    is_duplicated = True
+                    break
+            if is_duplicated is False:
+                resp = product.insert_to_rms(
+                    service_secret=service_secret,
+                    license_key=license_key
+                )
+                if resp == 'success':
+                    data['success'].append(product.title)
+                elif resp == 'incomplete':
+                    data['incomplete'].append(product.title)
+                elif resp == 'falied':
+                    data['failed'].append(product.title)
+            else:
+                data['duplicate'].append(product.title)
         return Response(
             data=data,
             status=status.HTTP_200_OK
