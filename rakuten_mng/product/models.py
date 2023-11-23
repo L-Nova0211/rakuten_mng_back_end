@@ -240,6 +240,7 @@ class Product(models.Model):
                         </folder>
                     </folderInsertRequest>
                 </request>'''
+                cabinet_api = CabinetAPI(service_secret=service_secret, license_key=license_key)
                 resp = cabinet_api.insert_folder(folder_data)
                 folder_id = xmltodict.parse(resp.text)['result']['cabinetFolderInsertResult']['FolderId']
                 img_data = {
