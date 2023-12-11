@@ -19,21 +19,22 @@ class ScrapingEngine:
         dom = bs(resp.content, "html.parser")
 
         item_detail = dom.find('section', attrs={'class': '__information'})
-        data['jan'] = item_detail.find('div', attrs={'class': '__spec'}).table.tr.td.text
-        # data['description'] = convert_text(item_detail.find('div', attrs={'class': '__description'}).text)
-        data['price'] = int(float(dom.find('span', attrs={'class': '__unit-price'}).text.split('円')[0].replace(',', '')))
-        data['count_set'] = int(dom.find('span', attrs={'class': '__quantity'}).text)
-        data['quantity'] = 20 # TODO
-        photos = dom.find('div', attrs={'class': '__photo'}).find_all('a')
-        for photo in photos:
-            url = photo['href']
-            data['photos'].append(
-                {
-                    'url': url
-                }
-            )
-        
-        result.append(data)
+        if item_detail:
+            data['jan'] = item_detail.find('div', attrs={'class': '__spec'}).table.tr.td.text
+            # data['description'] = convert_text(item_detail.find('div', attrs={'class': '__description'}).text)
+            data['price'] = int(float(dom.find('span', attrs={'class': '__unit-price'}).text.split('円')[0].replace(',', '')))
+            data['count_set'] = int(dom.find('span', attrs={'class': '__quantity'}).text)
+            data['quantity'] = 20 # TODO
+            photos = dom.find('div', attrs={'class': '__photo'}).find_all('a')
+            for photo in photos:
+                url = photo['href']
+                data['photos'].append(
+                    {
+                        'url': url
+                    }
+                )
+            
+            result.append(data)
     
     def scrape_item_list(self, source_url):
         response = requests.get(
